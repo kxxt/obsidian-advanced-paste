@@ -7,13 +7,14 @@ const transforms: Transforms = {
 			return ok(
 				text
 					.split("\n")
-					.reduce(
-						(acc, cur) =>
-							acc.endsWith("-")
-								? `${acc.slice(0, -1)}${cur.trim()}`
-								: `${acc} ${cur.trim()}`,
-						""
-					)
+					.map((x) => x.trim())
+					.reduce((acc, cur, idx) => {
+						return acc.endsWith("-")
+							? `${acc.slice(0, -1)}${cur}`
+							: cur !== ""
+							? `${acc} ${cur}`
+							: `${acc}\n`;
+					})
 			);
 		},
 	},
