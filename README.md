@@ -2,7 +2,7 @@
 
 [![Sponsor](https://img.shields.io/badge/sponsor-via%20paypal-blue)](https://www.paypal.com/paypalme/tokxxt)
 ![License](https://img.shields.io/github/license/kxxt/obsidian-advanced-paste)
-![GitHub manifest version](https://img.shields.io/github/manifest-json/v/kxxt/obsidian-advanced-paste/master)
+![GitHub manifest version](https://img.shields.io/github/manifest-json/v/kxxt/obsidian-advanced-paste)
 
 This plugin provides several advanced paste commands for Obsidian.
 
