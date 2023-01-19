@@ -25,7 +25,9 @@ export type TransformFunction = (
 
 export interface BlobTransform {
 	type: "blob";
-	transform: (input: ClipboardItem) => TransformResult;
+	transform: (
+		input: ClipboardItem
+	) => TransformResult | Promise<TransformResult>;
 }
 
 export interface TextTransform {

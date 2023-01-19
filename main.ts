@@ -10,6 +10,7 @@ import {
 import textTransforms from "text-transforms";
 import * as _ from "lodash";
 import { Transform } from "transform";
+import { isPromise } from "util/types";
 
 interface AdvancedPasteSettings {
 	scriptDir: string;
@@ -19,7 +20,11 @@ const DEFAULT_SETTINGS: AdvancedPasteSettings = {
 	scriptDir: "advpaste",
 };
 
-async function executePaste(transform: Transform, editor: Editor) {
+async function executePaste(
+	transform: Transform,
+	editor: Editor,
+	view: MarkdownView
+) {
 	let result;
 	if (transform.type == "text") {
 		const input = await navigator.clipboard.readText();
@@ -32,6 +37,7 @@ async function executePaste(transform: Transform, editor: Editor) {
 	} else {
 		throw new Error("Unsupported input type");
 	}
+	if (isPromise(result)) result = await result;
 	if (result?.kind == "ok") {
 		editor.replaceSelection(result.value);
 	} else {
@@ -46,7 +52,7 @@ export default class AdvancedPastePlugin extends Plugin {
 		await this.loadSettings();
 		// This adds an editor command that can perform some operation on the current editor instance
 		for (const transformId in textTransforms) {
-			const { transform } = transforms[transformId];
+			const transform = textTransforms[transformId];
 			this.addCommand({
 				id: `advpaste-${transformId}`,
 				name: _.startCase(transformId),
