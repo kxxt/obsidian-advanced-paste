@@ -24,7 +24,7 @@ This command joins all the lines without trimming them before pasting.
 
 This command removes all the blank lines before pasting.
 
-This command is useful when you copies something from a web page and you find that there are too many blank lines when directly pasting into obsidian.
+This command is useful when you copy something from a web page and you find that there are too many blank lines when directly pasting into obsidian.
 
 ## Raw HTML
 
