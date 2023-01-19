@@ -63,15 +63,15 @@ export default class AdvancedPastePlugin extends Plugin {
 			const transform = transforms[transformId];
 			this.registerTransform(transformId, transform);
 		}
-		this.addCommand({
-			id: `advpaste-debug`,
-			name: "Debug",
-			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				const contents = await navigator.clipboard.read();
-				console.log(contents);
-				// editor.replaceSelection(transform(text));
-			},
-		});
+		// this.addCommand({
+		// 	id: `advpaste-debug`,
+		// 	name: "Debug",
+		// 	editorCallback: async (editor: Editor, view: MarkdownView) => {
+		// 		const contents = await navigator.clipboard.read();
+		// 		console.log(contents);
+		// 		// editor.replaceSelection(transform(text));
+		// 	},
+		// });
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new AdvancedPasteSettingTab(this.app, this));
 		console.info("obsidian-advanced-pasted loaded!");
