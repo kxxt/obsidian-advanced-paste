@@ -7,7 +7,7 @@ import {
 	PluginSettingTab,
 	Setting,
 } from "obsidian";
-import textTransforms from "text-transforms";
+import transforms from "transforms";
 import * as _ from "lodash";
 import { Transform } from "transform";
 import { isPromise } from "util/types";
@@ -48,16 +48,20 @@ async function executePaste(
 export default class AdvancedPastePlugin extends Plugin {
 	settings: AdvancedPasteSettings;
 
+	registerTransform(transformId: string, transform: Transform) {
+		this.addCommand({
+			id: `advpaste-${transformId}`,
+			name: _.startCase(transformId),
+			editorCallback: _.partial(executePaste, transform),
+		});
+	}
+
 	async onload() {
 		await this.loadSettings();
 		// This adds an editor command that can perform some operation on the current editor instance
-		for (const transformId in textTransforms) {
-			const transform = textTransforms[transformId];
-			this.addCommand({
-				id: `advpaste-${transformId}`,
-				name: _.startCase(transformId),
-				editorCallback: _.partial(executePaste, transform),
-			});
+		for (const transformId in transforms) {
+			const transform = transforms[transformId];
+			this.registerTransform(transformId, transform);
 		}
 		this.addCommand({
 			id: `advpaste-debug`,
@@ -69,7 +73,7 @@ export default class AdvancedPastePlugin extends Plugin {
 			},
 		});
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new AdvancedPasteSettingTab(this.app, this));
 		console.info("obsidian-advanced-pasted loaded!");
 	}
 
@@ -88,7 +92,7 @@ export default class AdvancedPastePlugin extends Plugin {
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
+class AdvancedPasteSettingTab extends PluginSettingTab {
 	plugin: AdvancedPastePlugin;
 
 	constructor(app: App, plugin: AdvancedPastePlugin) {
