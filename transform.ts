@@ -10,6 +10,13 @@ interface Err<TError> {
 	value: TError;
 }
 
+export function ok<TValue>(value: TValue): Ok<TValue> {
+	return { kind: "ok", value };
+}
+export function err<TValue>(value: TValue): Err<TValue> {
+	return { kind: "err", value };
+}
+
 export type TransformResult = Ok<string> | Err<string>;
 
 export type TransformFunction = (
