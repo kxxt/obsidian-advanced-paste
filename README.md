@@ -6,6 +6,8 @@
 
 This plugin provides several advanced paste commands for Obsidian.
 
+Usage: Assign a hotkey to the command that you want to use and then press the hotkey to paste the content.
+
 # Features
 
 ## Smart Join
