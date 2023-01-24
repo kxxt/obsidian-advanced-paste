@@ -69,10 +69,11 @@ By default, the input to your transform is the text in the clipboard.
 To support other MIME types, you can set the `type` field of your transform to `"blob"`:
 
 ```javascript
-export function myBlobTransform(input) {
+export async function myBlobTransform(input) {
 	if (!input.types.includes("text/html")) {
 		return { kind: "err", value: "No html found in clipboard!" };
 	}
+    const html = await input.getType("text/html");
 	return html.text();
 }
 myBlobTransform.type = "blob";
