@@ -148,7 +148,10 @@ class AdvancedPasteSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 
 		containerEl.empty();
-
+		const warning = containerEl.createEl("h2", {
+			text: "Never add untrusted scripts to the script directory BECAUSE IT MIGHT DESTROY YOUR VAULT OR WORSE!",
+		});
+		warning.style.color = "red";
 		containerEl.createEl("h2", {
 			text: "You need to disable and re-enable this plugin to apply the changes to your custom transform scripts and the script directory.",
 		});
