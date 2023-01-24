@@ -70,7 +70,6 @@ export default class AdvancedPastePlugin extends Plugin {
 		}
 		const { adapter } = this.app.vault;
 		const { scriptDir = DEFAULT_SETTINGS.scriptDir } = this.settings;
-		console.log("Script Dir is", scriptDir);
 		if (
 			(await adapter.exists(scriptDir)) &&
 			(await adapter.stat(scriptDir))?.type == "folder"
@@ -92,7 +91,6 @@ export default class AdvancedPastePlugin extends Plugin {
 					}
 				}
 				if (!module) continue;
-				console.log(module);
 				for (const prop of Object.getOwnPropertyNames(module)) {
 					const obj = module[prop];
 					if (typeof obj == "function") {
@@ -164,7 +162,6 @@ class AdvancedPasteSettingTab extends PluginSettingTab {
 					.setPlaceholder("advpaste")
 					.setValue(this.plugin.settings.scriptDir)
 					.onChange(async (value) => {
-						console.log("Secret: " + value);
 						this.plugin.settings.scriptDir = value;
 						await this.plugin.saveSettings();
 					})
