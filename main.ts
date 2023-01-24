@@ -68,6 +68,45 @@ export default class AdvancedPastePlugin extends Plugin {
 			const transform = transforms[transformId];
 			this.registerTransform(transformId, transform);
 		}
+		const { adapter } = this.app.vault;
+		const { scriptDir = DEFAULT_SETTINGS.scriptDir } = this.settings;
+		console.log("Script Dir is", scriptDir);
+		if (
+			(await adapter.exists(scriptDir)) &&
+			(await adapter.stat(scriptDir))?.type == "folder"
+		) {
+			const { files } = await adapter.list(scriptDir);
+			for (const filePath of files) {
+				let module;
+				if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
+					try {
+						module = await import(
+							"data:text/javascript," +
+								(await adapter.read(filePath))
+						);
+					} catch (e) {
+						new Notice(
+							`Advanced Paste failed to load script: ${filePath}\nPlease check your script!`
+						);
+						console.error("Advanced Paste Script Error:", e);
+					}
+				}
+				if (!module) continue;
+				console.log(module);
+				for (const prop of Object.getOwnPropertyNames(module)) {
+					const obj = module[prop];
+					if (typeof obj == "function") {
+						const { type = "text" } = obj;
+						const transform = { type, transform: obj };
+						this.registerTransform(
+							`advpaste-custom-${prop}`,
+							transform,
+							_.startCase(prop)
+						);
+					}
+				}
+			}
+		}
 		// this.addCommand({
 		// 	id: `advpaste-debug`,
 		// 	name: "Debug",
@@ -110,7 +149,9 @@ class AdvancedPasteSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		// containerEl.createEl("h2", { text: "Settings for my awesome plugin." });
+		containerEl.createEl("h2", {
+			text: "You need to disable and re-enable this plugin to apply the changes to your custom transform scripts and the script directory.",
+		});
 
 		new Setting(containerEl)
 			.setName("Script Directory")
