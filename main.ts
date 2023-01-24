@@ -38,7 +38,8 @@ async function executePaste(
 		throw new Error("Unsupported input type");
 	}
 	if (isPromise(result)) result = await result;
-	if (result?.kind == "ok") {
+	if (typeof result == "string") editor.replaceSelection(result);
+	else if (result?.kind == "ok") {
 		editor.replaceSelection(result.value);
 	} else {
 		new Notice(result?.value ?? "An error occurred in Advanced Paste.");
@@ -48,10 +49,14 @@ async function executePaste(
 export default class AdvancedPastePlugin extends Plugin {
 	settings: AdvancedPasteSettings;
 
-	registerTransform(transformId: string, transform: Transform) {
+	registerTransform(
+		transformId: string,
+		transform: Transform,
+		transformName: null | string = null
+	) {
 		this.addCommand({
 			id: `advpaste-${transformId}`,
-			name: _.startCase(transformId),
+			name: transformName ?? _.startCase(transformId),
 			editorCallback: _.partial(executePaste, transform),
 		});
 	}

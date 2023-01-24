@@ -21,18 +21,20 @@ export type TransformResult = Ok<string> | Err<string>;
 
 export type TransformFunction = (
 	input: string | ClipboardItem
-) => TransformResult;
+) => TransformResult | string;
 
 export interface BlobTransform {
 	type: "blob";
 	transform: (
 		input: ClipboardItem
-	) => TransformResult | Promise<TransformResult>;
+	) => string | TransformResult | Promise<TransformResult>;
 }
 
 export interface TextTransform {
 	type: "text";
-	transform: (input: string) => TransformResult;
+	transform: (
+		input: string
+	) => string | TransformResult | Promise<TransformResult>;
 }
 
 export type Transform = BlobTransform | TextTransform;
