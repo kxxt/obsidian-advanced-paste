@@ -151,7 +151,7 @@ class AdvancedPasteSettingTab extends PluginSettingTab {
 		});
 		warning.style.color = "red";
 		containerEl.createEl("h2", {
-			text: "You need to disable and re-enable this plugin to apply the changes to your custom transform scripts and the script directory.",
+			text: "You need to disable and re-enable this plugin in order to apply the changes to the script directory",
 		});
 
 		new Setting(containerEl)
