@@ -1,4 +1,4 @@
-import { Transforms, ok, err } from "transform";
+import { Transforms, ok, err } from "./transform";
 
 const transforms: Transforms = {
     smartJoin: {

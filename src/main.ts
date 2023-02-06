@@ -7,9 +7,9 @@ import {
     PluginSettingTab,
     Setting,
 } from "obsidian";
-import transforms from "transforms";
+import transforms from "./transforms";
 import * as _ from "lodash";
-import { Transform } from "transform";
+import { Transform } from "./transform";
 import { isPromise } from "util/types";
 
 interface AdvancedPasteSettings {
@@ -55,7 +55,7 @@ export default class AdvancedPastePlugin extends Plugin {
         transformName: null | string = null
     ) {
         this.addCommand({
-            id: `advpaste-${transformId}`,
+            id: transformId,
             name: transformName ?? _.startCase(transformId),
             editorCallback: _.partial(executePaste, transform),
         });
@@ -97,7 +97,7 @@ export default class AdvancedPastePlugin extends Plugin {
                         const { type = "text" } = obj;
                         const transform = { type, transform: obj };
                         this.registerTransform(
-                            `advpaste-custom-${prop}`,
+                            `custom-${prop}`,
                             transform,
                             _.startCase(prop)
                         );
