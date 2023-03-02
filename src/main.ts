@@ -6,6 +6,8 @@ import {
     Plugin,
     PluginSettingTab,
     Setting,
+    TFile,
+    TFolder,
 } from "obsidian";
 import transforms from "./transforms";
 import * as _ from "lodash";
@@ -68,24 +70,25 @@ export default class AdvancedPastePlugin extends Plugin {
             const transform = transforms[transformId];
             this.registerTransform(transformId, transform);
         }
-        const { adapter } = this.app.vault;
+        const vault = this.app.vault;
         const { scriptDir = DEFAULT_SETTINGS.scriptDir } = this.settings;
-        if (
-            (await adapter.exists(scriptDir)) &&
-            (await adapter.stat(scriptDir))?.type == "folder"
-        ) {
-            const { files } = await adapter.list(scriptDir);
-            for (const filePath of files) {
+        const fileOrFolder = vault.getAbstractFileByPath(scriptDir);
+        if (fileOrFolder instanceof TFolder) {
+            const scriptFolder = fileOrFolder;
+            const entries = await scriptFolder.children;
+            for (const entry of entries) {
                 let module;
-                if (filePath.endsWith(".js") || filePath.endsWith(".mjs")) {
+                if (
+                    entry instanceof TFile &&
+                    (entry.name.endsWith(".js") || entry.name.endsWith(".mjs"))
+                ) {
                     try {
                         module = await import(
-                            "data:text/javascript," +
-                                (await adapter.read(filePath))
+                            "data:text/javascript," + (await vault.read(entry))
                         );
                     } catch (e) {
                         new Notice(
-                            `Advanced Paste failed to load script: ${filePath}\nPlease check your script!`
+                            `Advanced Paste failed to load script: ${entry}\nPlease check your script!`
                         );
                         console.error("Advanced Paste Script Error:", e);
                     }
