@@ -73,44 +73,49 @@ export default class AdvancedPastePlugin extends Plugin {
         const vault = this.app.vault;
         const { scriptDir = DEFAULT_SETTINGS.scriptDir } = this.settings;
         // Wait for vault to be loaded
-        await sleep(1000);
-        const fileOrFolder = vault.getAbstractFileByPath(scriptDir);
-        if (fileOrFolder instanceof TFolder) {
-            const scriptFolder = fileOrFolder;
-            const entries = await scriptFolder.children;
-            for (const entry of entries) {
-                let module;
-                if (
-                    entry instanceof TFile &&
-                    (entry.name.endsWith(".js") || entry.name.endsWith(".mjs"))
-                ) {
-                    console.log(`Advanced Paste: Loading script ${entry.name}`);
-                    try {
-                        module = await import(
-                            "data:text/javascript," + (await vault.read(entry))
+        this.app.workspace.onLayoutReady(async () => {
+            const fileOrFolder = vault.getAbstractFileByPath(scriptDir);
+            if (fileOrFolder instanceof TFolder) {
+                const scriptFolder = fileOrFolder;
+                const entries = await scriptFolder.children;
+                for (const entry of entries) {
+                    let module;
+                    if (
+                        entry instanceof TFile &&
+                        (entry.name.endsWith(".js") ||
+                            entry.name.endsWith(".mjs"))
+                    ) {
+                        console.log(
+                            `Advanced Paste: Loading script ${entry.name}`
                         );
-                    } catch (e) {
-                        new Notice(
-                            `Advanced Paste failed to load script: ${entry}\nPlease check your script!`
-                        );
-                        console.error("Advanced Paste Script Error:", e);
+                        try {
+                            module = await import(
+                                "data:text/javascript," +
+                                    (await vault.read(entry))
+                            );
+                        } catch (e) {
+                            new Notice(
+                                `Advanced Paste failed to load script: ${entry}\nPlease check your script!`
+                            );
+                            console.error("Advanced Paste Script Error:", e);
+                        }
                     }
-                }
-                if (!module) continue;
-                for (const prop of Object.getOwnPropertyNames(module)) {
-                    const obj = module[prop];
-                    if (typeof obj == "function") {
-                        const { type = "text" } = obj;
-                        const transform = { type, transform: obj };
-                        this.registerTransform(
-                            `custom-${prop}`,
-                            transform,
-                            _.startCase(prop)
-                        );
+                    if (!module) continue;
+                    for (const prop of Object.getOwnPropertyNames(module)) {
+                        const obj = module[prop];
+                        if (typeof obj == "function") {
+                            const { type = "text" } = obj;
+                            const transform = { type, transform: obj };
+                            this.registerTransform(
+                                `custom-${prop}`,
+                                transform,
+                                _.startCase(prop)
+                            );
+                        }
                     }
                 }
             }
-        }
+        });
         // this.addCommand({
         // 	id: `advpaste-debug`,
         // 	name: "Debug",
