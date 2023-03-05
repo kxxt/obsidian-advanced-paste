@@ -72,6 +72,8 @@ export default class AdvancedPastePlugin extends Plugin {
         }
         const vault = this.app.vault;
         const { scriptDir = DEFAULT_SETTINGS.scriptDir } = this.settings;
+        // Wait for vault to be loaded
+        await sleep(1000);
         const fileOrFolder = vault.getAbstractFileByPath(scriptDir);
         if (fileOrFolder instanceof TFolder) {
             const scriptFolder = fileOrFolder;
@@ -82,6 +84,7 @@ export default class AdvancedPastePlugin extends Plugin {
                     entry instanceof TFile &&
                     (entry.name.endsWith(".js") || entry.name.endsWith(".mjs"))
                 ) {
+                    console.log(`Advanced Paste: Loading script ${entry.name}`);
                     try {
                         module = await import(
                             "data:text/javascript," + (await vault.read(entry))
