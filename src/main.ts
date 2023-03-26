@@ -12,7 +12,6 @@ import {
 import transforms from "./transforms";
 import * as _ from "lodash";
 import { Transform } from "./transform";
-import { isPromise } from "util/types";
 
 interface AdvancedPasteSettings {
     scriptDir: string;
@@ -39,7 +38,7 @@ async function executePaste(
     } else {
         throw new Error("Unsupported input type");
     }
-    if (isPromise(result)) result = await result;
+    result = await Promise.resolve(result);
     if (typeof result == "string") editor.replaceSelection(result);
     else if (result?.kind == "ok") {
         editor.replaceSelection(result.value);
