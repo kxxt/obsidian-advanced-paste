@@ -45,6 +45,17 @@ const transforms: Transforms = {
             return ok(await html.text());
         },
     },
+    default: {
+        type: "blob",
+        async transform(input, { turndown }) {
+            if (input.types.includes("text/html")) {
+                const html = await input.getType("text/html");
+                return turndown.turndown(await html.text());
+            }
+            const text = await input.getType("text/plain");
+            return text.text();
+        },
+    },
 };
 
 export default transforms;
