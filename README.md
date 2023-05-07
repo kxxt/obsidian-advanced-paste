@@ -26,6 +26,8 @@ The default transform will convert html to markdown using [turndown](https://git
 uses turndown, but it doesn't use the [turndown-plugin-gfm](https://github.com/mixmark-io/turndown-plugin-gfm) plugin, which means that it doesn't support
 converting html tables to markdown tables, html task lists to markdown task lists, etc.
 
+![Showcase](images/default-command.gif)
+
 ### TODO
 
 -   [ ] try to eliminate the extra blank lines in the converted markdown.
