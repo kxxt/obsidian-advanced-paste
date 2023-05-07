@@ -109,3 +109,21 @@ as an error to the end user, will show up.
 { kind: "ok", value: "string" }
 { kind: "err", value: "An error occurred!" }
 ```
+
+## Advanced: Utilities
+
+The transform function can take an optional second parameter `utils` which is an object containing some useful helpers.
+
+Currently, the [turndown service]() is provided as a utility. You can call `turndown.turndown` to convert html to markdown.
+
+```javascript
+export async function myTransform(input, { turndown }) {
+    if (input.types.includes("text/html")) {
+        const html = await input.getType("text/html");
+        return turndown.turndown(await html.text());
+    }
+    const text = await input.getType("text/plain");
+    return text.text();
+}
+myTransform.type = "blob";
+```
