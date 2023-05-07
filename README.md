@@ -8,7 +8,8 @@ This plugin provides advanced paste commands and enables you to create custom tr
 
 Usage: Assign a hotkey to the command that you want to use and then press the hotkey to paste the content.
 
-Personally, I prefer to assign <kbd>Alt</kbd>+<kbd>V</kbd> to `Smart Join` and <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> to `Remove Blank Lines`.
+Personally, I prefer to assign <kbd>Ctrl</kbd>+<kbd>V</kbd> to [`Default`](#default), <kbd>Alt</kbd>+<kbd>V</kbd> to [`Smart Join`](#smart-join)
+and <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> to [`Remove Blank Lines`](#remove-blank-lines).
 
 > **Warning**
 > Never add untrusted scripts to the script directory BECAUSE IT MIGHT DESTROY YOUR VAULT OR WORSE!
@@ -16,6 +17,18 @@ Personally, I prefer to assign <kbd>Alt</kbd>+<kbd>V</kbd> to `Smart Join` and <
 **You need to disable and re-enable this plugin in order to apply the changes to the script directory.**
 
 # Features
+
+## Default
+
+This plugin provides a default transform that is better than Obsidian built-in. You can bind `Ctrl+V` to it to replace the Obsidian built-in paste function.
+
+The default transform will convert html to markdown using [turndown](https://github.com/mixmark-io/turndown). Obsidian's built-in paste function also
+uses turndown, but it doesn't use the [turndown-plugin-gfm](https://github.com/mixmark-io/turndown-plugin-gfm) plugin, which means that it doesn't support
+converting html tables to markdown tables, html task lists to markdown task lists, etc.
+
+### TODO
+
+-   [ ] try to eliminate the extra blank lines in the converted markdown.
 
 ## Smart Join
 
