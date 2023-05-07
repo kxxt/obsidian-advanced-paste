@@ -1,3 +1,5 @@
+import TurndownService from "turndown";
+
 export type TransformType = "text" | "blob";
 
 interface Ok<TValue> {
@@ -19,8 +21,13 @@ export function err<TValue>(value: TValue): Err<TValue> {
 
 export type TransformResult = Ok<string> | Err<string>;
 
+export interface TransformUtils {
+    turndown: TurndownService;
+}
+
 export type TransformFunction = (
-    input: string | ClipboardItem
+    input: string | ClipboardItem,
+    utils: TransformUtils
 ) => TransformResult | string;
 
 export type TransformOutput =
@@ -31,12 +38,12 @@ export type TransformOutput =
 
 export interface BlobTransform {
     type: "blob";
-    transform: (input: ClipboardItem) => TransformOutput;
+    transform: (input: ClipboardItem, utils: TransformUtils) => TransformOutput;
 }
 
 export interface TextTransform {
     type: "text";
-    transform: (input: string) => TransformOutput;
+    transform: (input: string, utils: TransformUtils) => TransformOutput;
 }
 
 export type Transform = BlobTransform | TextTransform;

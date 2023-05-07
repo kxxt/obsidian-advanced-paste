@@ -11,29 +11,54 @@ import {
 } from "obsidian";
 import transforms from "./transforms";
 import * as _ from "lodash";
-import { Transform } from "./transform";
+import { Transform, TransformUtils } from "./transform";
+import TurnDownService from "turndown";
+import TurndownService from "turndown";
+// No types for this plugin, so we have to use require
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { gfm } = require("turndown-plugin-gfm");
 
 interface AdvancedPasteSettings {
     scriptDir: string;
+    turndown: TurnDownService.Options;
 }
 
 const DEFAULT_SETTINGS: AdvancedPasteSettings = {
     scriptDir: "advpaste",
+    turndown: {
+        headingStyle: "atx",
+        hr: "* * *",
+        bulletListMarker: "-",
+        codeBlockStyle: "fenced",
+        fence: "```",
+        emDelimiter: "*",
+        strongDelimiter: "**",
+        linkStyle: "inlined",
+        linkReferenceStyle: "full",
+        // preformattedCode: false,
+    },
 };
+
+function initTurnDown(options: TurndownService.Options): TurnDownService {
+    const turndown = new TurndownService(options);
+    turndown.use(gfm);
+    return turndown;
+}
 
 async function executePaste(
     transform: Transform,
+    utils: TransformUtils,
     editor: Editor,
     view: MarkdownView
 ) {
     let result;
     if (transform.type == "text") {
         const input = await navigator.clipboard.readText();
-        result = transform.transform(input);
+        result = transform.transform(input, utils);
     } else if (transform.type == "blob") {
         const inputs = await navigator.clipboard.read();
         if (inputs.length > 0) {
-            result = transform.transform(inputs[0]);
+            result = transform.transform(inputs[0], utils);
         } else new Notice("Nothing to paste!");
     } else {
         throw new Error("Unsupported input type");
@@ -49,6 +74,7 @@ async function executePaste(
 
 export default class AdvancedPastePlugin extends Plugin {
     settings: AdvancedPasteSettings;
+    utils: TransformUtils;
 
     registerTransform(
         transformId: string,
@@ -58,12 +84,15 @@ export default class AdvancedPastePlugin extends Plugin {
         this.addCommand({
             id: transformId,
             name: transformName ?? _.startCase(transformId),
-            editorCallback: _.partial(executePaste, transform),
+            editorCallback: _.partial(executePaste, transform, this.utils),
         });
     }
 
     async onload() {
         await this.loadSettings();
+        this.utils = {
+            turndown: initTurnDown(this.settings.turndown),
+        };
         // This adds an editor command that can perform some operation on the current editor instance
         for (const transformId in transforms) {
             const transform = transforms[transformId];
@@ -140,6 +169,7 @@ export default class AdvancedPastePlugin extends Plugin {
     }
 
     async saveSettings() {
+        this.utils.turndown = initTurnDown(this.settings.turndown);
         await this.saveData(this.settings);
     }
 }
@@ -176,5 +206,143 @@ class AdvancedPasteSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     })
             );
+        containerEl.createEl("h2", {
+            text: "Turndown Settings",
+        });
+        containerEl.createEl("p", {
+            text: "Turndown is a library that converts HTML to Markdown. Some transforms in this plugin use it. You can configure it here.",
+        });
+        new Setting(containerEl)
+            .setName("Heading Style")
+            .setDesc("atx for `# heading`, setext for line under `heading`")
+            .addDropdown((dropdown) => {
+                dropdown.addOption("atx", "atx");
+                dropdown.addOption("setext", "setext");
+                dropdown.addOption("", "turndown default");
+                dropdown.setValue(
+                    this.plugin.settings.turndown.headingStyle ?? ""
+                );
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.turndown.headingStyle =
+                        value === ""
+                            ? undefined
+                            : (value as TurndownService.Options["headingStyle"]);
+                    await this.plugin.saveSettings();
+                });
+            });
+        new Setting(containerEl)
+            .setName("Bullet List Marker")
+            .addText((text) => {
+                text.setPlaceholder("-")
+                    .setValue(
+                        this.plugin.settings.turndown.bulletListMarker ?? "-"
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.turndown.bulletListMarker =
+                            value as TurndownService.Options["bulletListMarker"];
+                        await this.plugin.saveSettings();
+                    });
+            });
+        new Setting(containerEl)
+            .setName("Code Block Style")
+            .addDropdown((dropdown) => {
+                dropdown.addOption("fenced", "fenced");
+                dropdown.addOption("indented", "indented");
+                dropdown.addOption("", "turndown default");
+                dropdown.setValue(
+                    this.plugin.settings.turndown.codeBlockStyle ?? ""
+                );
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.turndown.codeBlockStyle =
+                        value === ""
+                            ? undefined
+                            : (value as TurndownService.Options["codeBlockStyle"]);
+                    await this.plugin.saveSettings();
+                });
+            });
+        new Setting(containerEl)
+            .setName("Code Block Fence Style")
+            .addDropdown((dropdown) => {
+                dropdown.addOption("```", "```");
+                dropdown.addOption("~~~", "~~~");
+                dropdown.addOption("", "turndown default");
+                dropdown.setValue(this.plugin.settings.turndown.fence ?? "");
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.turndown.fence =
+                        value === ""
+                            ? undefined
+                            : (value as TurndownService.Options["fence"]);
+                    await this.plugin.saveSettings();
+                });
+            });
+        new Setting(containerEl)
+            .setName("Emphasis Style")
+            .addDropdown((dropdown) => {
+                dropdown.addOption("*", "asterisk");
+                dropdown.addOption("_", "underscore");
+                dropdown.addOption("", "turndown default");
+                dropdown.setValue(
+                    this.plugin.settings.turndown.emDelimiter ?? ""
+                );
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.turndown.emDelimiter =
+                        value === ""
+                            ? undefined
+                            : (value as TurndownService.Options["emDelimiter"]);
+                    await this.plugin.saveSettings();
+                });
+            });
+        new Setting(containerEl)
+            .setName("Strong Style")
+            .addDropdown((dropdown) => {
+                dropdown.addOption("**", "asterisk");
+                dropdown.addOption("__", "underscore");
+                dropdown.addOption("", "turndown default");
+                dropdown.setValue(
+                    this.plugin.settings.turndown.strongDelimiter ?? ""
+                );
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.turndown.strongDelimiter =
+                        value === ""
+                            ? undefined
+                            : (value as TurndownService.Options["strongDelimiter"]);
+                    await this.plugin.saveSettings();
+                });
+            });
+        new Setting(containerEl)
+            .setName("Link Style")
+            .addDropdown((dropdown) => {
+                dropdown.addOption("inlined", "inlined");
+                dropdown.addOption("referenced", "referenced");
+                dropdown.addOption("", "turndown default");
+                dropdown.setValue(
+                    this.plugin.settings.turndown.linkStyle ?? ""
+                );
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.turndown.linkStyle =
+                        value === ""
+                            ? undefined
+                            : (value as TurndownService.Options["linkStyle"]);
+                    await this.plugin.saveSettings();
+                });
+            });
+        new Setting(containerEl)
+            .setName("Link Reference Style")
+            .addDropdown((dropdown) => {
+                dropdown.addOption("full", "full");
+                dropdown.addOption("collapsed", "collapsed");
+                dropdown.addOption("shortcut", "shortcut");
+                dropdown.addOption("", "turndown default");
+                dropdown.setValue(
+                    this.plugin.settings.turndown.linkReferenceStyle ?? ""
+                );
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.turndown.linkReferenceStyle =
+                        value === ""
+                            ? undefined
+                            : (value as TurndownService.Options["linkReferenceStyle"]);
+                    await this.plugin.saveSettings();
+                });
+            });
     }
 }
