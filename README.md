@@ -22,9 +22,10 @@ and <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> to [`Remove Blank Lines`](#remo
 
 This plugin provides a default transform that is better than Obsidian built-in. You can bind `Ctrl+V` to it to replace the Obsidian built-in paste function.
 
-The default transform will convert html to markdown using [turndown](https://github.com/mixmark-io/turndown). Obsidian's built-in paste function also
-uses turndown, but it doesn't use the [turndown-plugin-gfm](https://github.com/mixmark-io/turndown-plugin-gfm) plugin, which means that it doesn't support
-converting html tables to markdown tables, html task lists to markdown task lists, etc.
+The default transform will convert html to markdown using [turndown](https://github.com/mixmark-io/turndown)
+and [turndown-plugin-gfm](https://github.com/mixmark-io/turndown-plugin-gfm). Obsidian's built-in paste function also
+uses turndown, but it doesn't use the [turndown-plugin-gfm](https://github.com/mixmark-io/turndown-plugin-gfm) plugin, which means that obsidian's built-in paste
+doesn't support converting html tables to markdown tables, html task lists to markdown task lists, etc.
 
 ![Showcase](images/default-command.gif)
 
