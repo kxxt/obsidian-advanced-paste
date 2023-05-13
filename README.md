@@ -117,10 +117,22 @@ as an error to the end user, will show up.
 
 The transform function can take an optional second parameter `utils` which is an object containing some useful helpers.
 
-Currently, the [turndown service]() is provided as a utility. You can call `turndown.turndown` to convert html to markdown.
+Currently, the [turndown service](https://github.com/mixmark-io/turndown) is provided as a utility. You can call `turndown.turndown` to convert html to markdown.
+
+You can call `saveAttachment` to save a blob to the vault. The function signature is:
+
+```typescript
+saveAttachment: (name: string, ext: string, data: ArrayBuffer) =>
+    Promise<TFile>;
+```
+
+`lodash`, `moment.js` and `mine-types` are also provided as utilities. Check out the following example:
 
 ```javascript
-export async function myTransform(input, { turndown }) {
+export async function myTransform(
+    input,
+    { turndown, _, moment, mime, saveAttachment }
+) {
     if (input.types.includes("text/html")) {
         const html = await input.getType("text/html");
         return turndown.turndown(await html.text());
