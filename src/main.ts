@@ -65,7 +65,6 @@ async function executePaste(
                 ext,
                 view.file
             );
-            console.log(path);
             return vault.createBinary(path, data);
         },
     };
@@ -169,18 +168,18 @@ export default class AdvancedPastePlugin extends Plugin {
                 }
             }
         });
-        this.addCommand({
-            id: `advpaste-debug`,
-            name: "Debug",
-            editorCallback: async (editor: Editor, view: MarkdownView) => {
-                const contents = await navigator.clipboard.read();
-                console.log(contents);
-                // editor.replaceSelection(transform(text));
-                console.log(
-                    getAvailablePathForAttachments("x", "js", view.file)
-                );
-            },
-        });
+        // this.addCommand({
+        //     id: `advpaste-debug`,
+        //     name: "Debug",
+        //     editorCallback: async (editor: Editor, view: MarkdownView) => {
+        //         const contents = await navigator.clipboard.read();
+        //         console.log(contents);
+        //         // editor.replaceSelection(transform(text));
+        //         console.log(
+        //             getAvailablePathForAttachments("x", "js", view.file)
+        //         );
+        //     },
+        // });
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new AdvancedPasteSettingTab(this.app, this));
         console.info("obsidian-advanced-pasted loaded!");
