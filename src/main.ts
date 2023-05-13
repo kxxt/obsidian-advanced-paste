@@ -17,6 +17,7 @@ import TurnDownService from "turndown";
 import TurndownService from "turndown";
 import { getAvailablePathForAttachments } from "obsidian-community-lib";
 import mime from "mime-types";
+import moment from "moment";
 // No types for this plugin, so we have to use require
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { gfm } = require("turndown-plugin-gfm");
@@ -109,6 +110,8 @@ export default class AdvancedPastePlugin extends Plugin {
         this.utils = {
             turndown: initTurnDown(this.settings.turndown),
             mime,
+            _,
+            moment,
         };
         // This adds an editor command that can perform some operation on the current editor instance
         for (const transformId in transforms) {

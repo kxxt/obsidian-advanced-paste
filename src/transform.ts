@@ -1,7 +1,5 @@
 import { TFile } from "obsidian";
 import TurndownService from "turndown";
-import mime from "mime-types";
-
 export type TransformType = "text" | "blob";
 
 interface Ok<TValue> {
@@ -25,7 +23,9 @@ export type TransformResult = Ok<string> | Err<string>;
 
 export interface TransformUtilsBase {
     turndown: TurndownService;
-    mime: typeof mime;
+    mime: typeof import("mime-types");
+    _: typeof import("lodash");
+    moment: typeof import("moment");
 }
 
 export interface TransformUtils extends TransformUtilsBase {
