@@ -8,12 +8,15 @@ import {
     Setting,
     TFile,
     TFolder,
+    Vault,
 } from "obsidian";
 import transforms from "./transforms";
 import * as _ from "lodash";
-import { Transform, TransformUtils } from "./transform";
+import { Transform, TransformUtils, TransformUtilsBase } from "./transform";
 import TurnDownService from "turndown";
 import TurndownService from "turndown";
+import { getAvailablePathForAttachments } from "obsidian-community-lib";
+import mime from "mime-types";
 // No types for this plugin, so we have to use require
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { gfm } = require("turndown-plugin-gfm");
@@ -47,11 +50,19 @@ function initTurnDown(options: TurndownService.Options): TurnDownService {
 
 async function executePaste(
     transform: Transform,
-    utils: TransformUtils,
+    utilsBase: TransformUtilsBase,
+    vault: Vault,
     editor: Editor,
     view: MarkdownView
 ) {
     let result;
+    const utils: TransformUtils = {
+        ...utilsBase,
+        saveAttachment(name, ext, data) {
+            const path = getAvailablePathForAttachments(name, ext, view.file);
+            return vault.createBinary(path, data);
+        },
+    };
     if (transform.type == "text") {
         const input = await navigator.clipboard.readText();
         result = transform.transform(input, utils);
@@ -74,7 +85,7 @@ async function executePaste(
 
 export default class AdvancedPastePlugin extends Plugin {
     settings: AdvancedPasteSettings;
-    utils: TransformUtils;
+    utils: TransformUtilsBase;
 
     registerTransform(
         transformId: string,
@@ -84,7 +95,12 @@ export default class AdvancedPastePlugin extends Plugin {
         this.addCommand({
             id: transformId,
             name: transformName ?? _.startCase(transformId),
-            editorCallback: _.partial(executePaste, transform, this.utils),
+            editorCallback: _.partial(
+                executePaste,
+                transform,
+                this.utils,
+                this.app.vault
+            ),
         });
     }
 
@@ -92,6 +108,7 @@ export default class AdvancedPastePlugin extends Plugin {
         await this.loadSettings();
         this.utils = {
             turndown: initTurnDown(this.settings.turndown),
+            mime,
         };
         // This adds an editor command that can perform some operation on the current editor instance
         for (const transformId in transforms) {
@@ -144,15 +161,18 @@ export default class AdvancedPastePlugin extends Plugin {
                 }
             }
         });
-        // this.addCommand({
-        // 	id: `advpaste-debug`,
-        // 	name: "Debug",
-        // 	editorCallback: async (editor: Editor, view: MarkdownView) => {
-        // 		const contents = await navigator.clipboard.read();
-        // 		console.log(contents);
-        // 		// editor.replaceSelection(transform(text));
-        // 	},
-        // });
+        this.addCommand({
+            id: `advpaste-debug`,
+            name: "Debug",
+            editorCallback: async (editor: Editor, view: MarkdownView) => {
+                const contents = await navigator.clipboard.read();
+                console.log(contents);
+                // editor.replaceSelection(transform(text));
+                console.log(
+                    getAvailablePathForAttachments("x", "js", view.file)
+                );
+            },
+        });
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new AdvancedPasteSettingTab(this.app, this));
         console.info("obsidian-advanced-pasted loaded!");

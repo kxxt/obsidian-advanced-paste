@@ -1,4 +1,6 @@
+import { TFile } from "obsidian";
 import TurndownService from "turndown";
+import mime from "mime-types";
 
 export type TransformType = "text" | "blob";
 
@@ -21,8 +23,17 @@ export function err<TValue>(value: TValue): Err<TValue> {
 
 export type TransformResult = Ok<string> | Err<string>;
 
-export interface TransformUtils {
+export interface TransformUtilsBase {
     turndown: TurndownService;
+    mime: typeof mime;
+}
+
+export interface TransformUtils extends TransformUtilsBase {
+    saveAttachment: (
+        name: string,
+        ext: string,
+        data: ArrayBuffer
+    ) => Promise<TFile>;
 }
 
 export type TransformFunction = (
