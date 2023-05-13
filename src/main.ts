@@ -59,8 +59,13 @@ async function executePaste(
     let result;
     const utils: TransformUtils = {
         ...utilsBase,
-        saveAttachment(name, ext, data) {
-            const path = getAvailablePathForAttachments(name, ext, view.file);
+        async saveAttachment(name, ext, data) {
+            const path = await getAvailablePathForAttachments(
+                name,
+                ext,
+                view.file
+            );
+            console.log(path);
             return vault.createBinary(path, data);
         },
     };

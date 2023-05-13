@@ -47,13 +47,29 @@ const transforms: Transforms = {
     },
     default: {
         type: "blob",
-        async transform(input, { turndown }) {
+        async transform(input, { turndown, saveAttachment, mime, moment }) {
+            for (const type of input.types) {
+                if (type.startsWith("image/")) {
+                    const blob = await input.getType(type);
+                    const ext = mime.extension(type);
+                    if (!ext) {
+                        return err(
+                            `Failed to save attachment: Could not determine extension for mime type ${type}`
+                        );
+                    }
+                    const name = `Pasted Image ${moment().format(
+                        "YYYYMMDDHHmmss"
+                    )}`;
+                    await saveAttachment(name, ext, await blob.arrayBuffer());
+                    return ok(`![[${name}.${ext}]]`);
+                }
+            }
             if (input.types.includes("text/html")) {
                 const html = await input.getType("text/html");
-                return turndown.turndown(await html.text());
+                return ok(turndown.turndown(await html.text()));
             }
             const text = await input.getType("text/plain");
-            return text.text();
+            return ok(await text.text());
         },
     },
 };
