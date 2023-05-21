@@ -16,33 +16,14 @@ import TurndownService from "turndown";
 import { getAvailablePathForAttachments } from "obsidian-community-lib";
 import mime from "mime-types";
 import moment from "moment";
-import { AdvancedPasteSettingTab } from "./settings";
+import {
+    AdvancedPasteSettingTab,
+    AdvancedPasteSettings,
+    DEFAULT_SETTINGS,
+} from "./settings";
 // No types for this plugin, so we have to use require
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { gfm } = require("turndown-plugin-gfm");
-
-interface AdvancedPasteSettings {
-    scriptDir: string;
-    turndown: TurnDownService.Options;
-    enhanceDefaultPaste: boolean;
-}
-
-const DEFAULT_SETTINGS: AdvancedPasteSettings = {
-    scriptDir: "advpaste",
-    turndown: {
-        headingStyle: "atx",
-        hr: "* * *",
-        bulletListMarker: "-",
-        codeBlockStyle: "fenced",
-        fence: "```",
-        emDelimiter: "*",
-        strongDelimiter: "**",
-        linkStyle: "inlined",
-        linkReferenceStyle: "full",
-        // preformattedCode: false,
-    },
-    enhanceDefaultPaste: true,
-};
 
 function initTurnDown(options: TurndownService.Options): TurnDownService {
     const turndown = new TurndownService(options);

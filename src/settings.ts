@@ -1,6 +1,32 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import TurndownService from "turndown";
+import TurnDownService from "turndown";
 import AdvancedPastePlugin from "./main";
+
+export interface AdvancedPasteSettings {
+    scriptDir: string;
+    turndown: TurnDownService.Options;
+    enhanceDefaultPaste: boolean;
+}
+
+const DEFAULT_SETTINGS: AdvancedPasteSettings = {
+    scriptDir: "advpaste",
+    turndown: {
+        headingStyle: "atx",
+        hr: "* * *",
+        bulletListMarker: "-",
+        codeBlockStyle: "fenced",
+        fence: "```",
+        emDelimiter: "*",
+        strongDelimiter: "**",
+        linkStyle: "inlined",
+        linkReferenceStyle: "full",
+        // preformattedCode: false,
+    },
+    enhanceDefaultPaste: true,
+};
+
+export { DEFAULT_SETTINGS };
 
 export class AdvancedPasteSettingTab extends PluginSettingTab {
     plugin: AdvancedPastePlugin;
