@@ -49,9 +49,13 @@ function privilegedWrapper({ vault }: { vault: Vault }): Transforms {
         },
         default: {
             type: "blob",
-            async transform(input, { turndown, saveAttachment, mime, moment }) {
+            async transform(
+                input,
+                { turndown, saveAttachment, mime, moment },
+                { shouldHandleImagePasting }
+            ) {
                 for (const type of input.types) {
-                    if (type.startsWith("image/")) {
+                    if (type.startsWith("image/") && shouldHandleImagePasting) {
                         const blob = await input.getType(type);
                         const ext = mime.extension(type);
                         if (!ext) {
@@ -71,11 +75,17 @@ function privilegedWrapper({ vault }: { vault: Vault }): Transforms {
                     } else if (type == "text/plain") {
                         const blob = await input.getType(type);
                         const text = await blob.text();
-                        if (text.match(/^file:\/\/.+$/)) {
+                        if (
+                            text.match(/^file:\/\/.+$/) &&
+                            shouldHandleImagePasting
+                        ) {
                             try {
                                 // eslint-disable-next-line @typescript-eslint/no-var-requires
                                 const fs = require("fs").promises;
-                                const path = decodeURIComponent(text).replace(/^file:\/\//, "");
+                                const path = decodeURIComponent(text).replace(
+                                    /^file:\/\//,
+                                    ""
+                                );
                                 const mimeType = mime.lookup(path);
                                 if (!mimeType || !mimeType.startsWith("image/"))
                                     throw new Error("Not an image file!");
