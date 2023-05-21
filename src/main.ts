@@ -200,22 +200,13 @@ export default class AdvancedPastePlugin extends Plugin {
                         // Event was triggered by us, don't handle it again
                         return;
                     }
-                    evt.preventDefault();
-                    evt.stopPropagation();
-                    executePaste(
-                        transforms["default"],
-                        this.utils,
-                        this.app.vault,
-                        true,
-                        editor,
-                        info
-                    ).then((result) => {
-                        // console.log(result);
-                        if (result == null) {
-                            return;
-                        }
+                    const html = evt.clipboardData?.getData("text/html");
+                    if (html) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        const md = this.utils.turndown.turndown(html);
                         const dat = new DataTransfer();
-                        dat.setData("text/html", `<pre>${result}</pre>`);
+                        dat.setData("text/html", `<pre>${md}</pre>`);
                         dat.setData("application/x-advpaste-tag", "tag");
                         const e = new ClipboardEvent("paste", {
                             clipboardData: dat,
@@ -226,7 +217,7 @@ export default class AdvancedPastePlugin extends Plugin {
                         )._children[0].clipboardManager;
                         // console.log(clipboardMgr);
                         clipboardMgr.handlePaste(e, editor, info);
-                    });
+                    }
                 });
             }
         });
