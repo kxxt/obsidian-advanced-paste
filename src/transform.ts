@@ -36,9 +36,14 @@ export interface TransformUtils extends TransformUtilsBase {
     ) => Promise<TFile>;
 }
 
+export interface AdvpasteInternalParams {
+    shouldHandleImagePasting: boolean;
+}
+
 export type TransformFunction = (
     input: string | ClipboardItem,
-    utils: TransformUtils
+    utils: TransformUtils,
+    internal: AdvpasteInternalParams
 ) => TransformResult | string;
 
 export type TransformOutput =
@@ -49,12 +54,20 @@ export type TransformOutput =
 
 export interface BlobTransform {
     type: "blob";
-    transform: (input: ClipboardItem, utils: TransformUtils) => TransformOutput;
+    transform: (
+        input: ClipboardItem,
+        utils: TransformUtils,
+        internal: AdvpasteInternalParams
+    ) => TransformOutput;
 }
 
 export interface TextTransform {
     type: "text";
-    transform: (input: string, utils: TransformUtils) => TransformOutput;
+    transform: (
+        input: string,
+        utils: TransformUtils,
+        internal: AdvpasteInternalParams
+    ) => TransformOutput;
 }
 
 export type Transform = BlobTransform | TextTransform;

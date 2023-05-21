@@ -1,6 +1,7 @@
 import {
     App,
     Editor,
+    MarkdownFileInfo,
     MarkdownView,
     Notice,
     Plugin,
@@ -53,39 +54,60 @@ async function executePaste(
     transform: Transform,
     utilsBase: TransformUtilsBase,
     vault: Vault,
+    withinEvent: boolean,
     editor: Editor,
-    view: MarkdownView
-) {
+    view: MarkdownFileInfo
+): Promise<string | null> {
     let result;
+    const file = view.file;
+    if (file == null) {
+        new Notice("Advanced paste: Can't determine active file!");
+        console.log(view);
+        throw new Error(
+            "Advanced paste: Can't determine active file!, view is"
+        );
+    }
     const utils: TransformUtils = {
         ...utilsBase,
         async saveAttachment(name, ext, data) {
-            const path = await getAvailablePathForAttachments(
-                name,
-                ext,
-                view.file
-            );
+            const path = await getAvailablePathForAttachments(name, ext, file);
             return vault.createBinary(path, data);
         },
     };
-    if (transform.type == "text") {
-        const input = await navigator.clipboard.readText();
-        result = transform.transform(input, utils);
-    } else if (transform.type == "blob") {
-        const inputs = await navigator.clipboard.read();
-        if (inputs.length > 0) {
-            result = transform.transform(inputs[0], utils);
-        } else new Notice("Nothing to paste!");
-    } else {
-        throw new Error("Unsupported input type");
+    const internalParams = { shouldHandleImagePasting: !withinEvent };
+    try {
+        if (transform.type == "text") {
+            const input = await navigator.clipboard.readText();
+            result = transform.transform(input, utils, internalParams);
+        } else if (transform.type == "blob") {
+            const inputs = await navigator.clipboard.read();
+            if (inputs.length > 0) {
+                result = transform.transform(inputs[0], utils, internalParams);
+            } else new Notice("Nothing to paste!");
+        } else {
+            throw new Error("Unsupported input type");
+        }
+    } catch (e) {
+        if (
+            e instanceof DOMException &&
+            e.message == "No valid data on clipboard."
+        ) {
+            return null;
+        }
+        throw e;
     }
+    const resultStringHandler = (str: string) => {
+        if (!withinEvent) editor.replaceSelection(str);
+        return str;
+    };
     result = await Promise.resolve(result);
-    if (typeof result == "string") editor.replaceSelection(result);
+    if (typeof result == "string") return resultStringHandler(result);
     else if (result?.kind == "ok") {
-        editor.replaceSelection(result.value);
+        return resultStringHandler(result.value);
     } else {
         new Notice(result?.value ?? "An error occurred in Advanced Paste.");
     }
+    return null;
 }
 
 export default class AdvancedPastePlugin extends Plugin {
@@ -104,7 +126,8 @@ export default class AdvancedPastePlugin extends Plugin {
                 executePaste,
                 transform,
                 this.utils,
-                this.app.vault
+                this.app.vault,
+                false
             ),
         });
     }
@@ -167,6 +190,23 @@ export default class AdvancedPastePlugin extends Plugin {
                     }
                 }
             }
+            this.app.workspace.on("editor-paste", async (evt, editor, info) => {
+                // evt.stopPropagation();
+                // evt.preventDefault();
+                const result = await executePaste(
+                    transforms["default"],
+                    this.utils,
+                    this.app.vault,
+                    true,
+                    editor,
+                    info
+                );
+                if (result == null) {
+                    return;
+                }
+                evt.clipboardData?.clearData();
+                evt.clipboardData?.setData("text/plain", result);
+            });
         });
         this.addCommand({
             id: `advpaste-debug`,
