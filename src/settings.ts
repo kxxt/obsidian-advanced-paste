@@ -7,6 +7,7 @@ export interface AdvancedPasteSettings {
     scriptDir: string;
     turndown: TurnDownService.Options;
     enhanceDefaultPaste: boolean;
+    autoLinkTitleRegex: RegExp;
 }
 
 const DEFAULT_SETTINGS: AdvancedPasteSettings = {
@@ -24,6 +25,8 @@ const DEFAULT_SETTINGS: AdvancedPasteSettings = {
         // preformattedCode: false,
     },
     enhanceDefaultPaste: true,
+    autoLinkTitleRegex:
+        /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$/i,
 };
 
 export { DEFAULT_SETTINGS };
@@ -75,6 +78,19 @@ export class AdvancedPasteSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     })
             );
+        // new Setting(containerEl)
+        //     .setName("Auto Link Title Regex")
+        //     .setDesc("The regex used in the auto link title plugin.")
+        //     .addText((text) =>
+        //         text
+        //             .setValue(this.plugin.settings.autoLinkTitleRegex.source)
+        //             .onChange(async (value) => {
+        //                 this.plugin.settings.autoLinkTitleRegex = new RegExp(
+        //                     value
+        //                 );
+        //                 await this.plugin.saveSettings();
+        //             })
+        //     );
         containerEl.createEl("h2", {
             text: "Turndown Settings",
         });

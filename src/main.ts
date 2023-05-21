@@ -176,9 +176,13 @@ export default class AdvancedPastePlugin extends Plugin {
                     if (
                         evt.clipboardData?.getData(
                             "application/x-advpaste-tag"
-                        ) == "tag"
+                        ) == "tag" ||
+                        this.settings.autoLinkTitleRegex.test(
+                            evt.clipboardData?.getData("text/plain") ?? ""
+                        )
                     ) {
-                        // Event was triggered by us, don't handle it again
+                        // 1. Event was triggered by us, don't handle it again
+                        // 2. url, let obsidian-auto-link-title handle it
                         return;
                     }
                     const html = evt.clipboardData?.getData("text/html");
