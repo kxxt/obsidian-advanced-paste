@@ -25,6 +25,9 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { gfm } = require("turndown-plugin-gfm");
 
+const AUTO_LINK_TITLE_REGEX =
+    /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$/i;
+
 function initTurnDown(options: TurndownService.Options): TurnDownService {
     const turndown = new TurndownService(options);
     turndown.use(gfm);
@@ -177,7 +180,7 @@ export default class AdvancedPastePlugin extends Plugin {
                         evt.clipboardData?.getData(
                             "application/x-advpaste-tag"
                         ) == "tag" ||
-                        this.settings.autoLinkTitleRegex.test(
+                        AUTO_LINK_TITLE_REGEX.test(
                             evt.clipboardData?.getData("text/plain") ?? ""
                         )
                     ) {
