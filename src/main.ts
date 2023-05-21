@@ -10,7 +10,7 @@ import {
     TFolder,
     Vault,
 } from "obsidian";
-import transforms from "./transforms";
+import transformsWrapper from "./transforms";
 import * as _ from "lodash";
 import { Transform, TransformUtils, TransformUtilsBase } from "./transform";
 import TurnDownService from "turndown";
@@ -117,7 +117,7 @@ export default class AdvancedPastePlugin extends Plugin {
             _,
             moment,
         };
-        // This adds an editor command that can perform some operation on the current editor instance
+        const transforms = transformsWrapper({ vault: this.app.vault });
         for (const transformId in transforms) {
             const transform = transforms[transformId];
             this.registerTransform(transformId, transform);
@@ -168,18 +168,14 @@ export default class AdvancedPastePlugin extends Plugin {
                 }
             }
         });
-        // this.addCommand({
-        //     id: `advpaste-debug`,
-        //     name: "Debug",
-        //     editorCallback: async (editor: Editor, view: MarkdownView) => {
-        //         const contents = await navigator.clipboard.read();
-        //         console.log(contents);
-        //         // editor.replaceSelection(transform(text));
-        //         console.log(
-        //             getAvailablePathForAttachments("x", "js", view.file)
-        //         );
-        //     },
-        // });
+        this.addCommand({
+            id: `advpaste-debug`,
+            name: "Dump Clipboard to Console",
+            editorCallback: async (editor: Editor, view: MarkdownView) => {
+                const contents = await navigator.clipboard.read();
+                console.log(contents);
+            },
+        });
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new AdvancedPasteSettingTab(this.app, this));
         console.info("obsidian-advanced-pasted loaded!");
