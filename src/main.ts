@@ -24,6 +24,7 @@ const { gfm } = require("turndown-plugin-gfm");
 interface AdvancedPasteSettings {
     scriptDir: string;
     turndown: TurnDownService.Options;
+    enhanceDefaultPaste: boolean;
 }
 
 const DEFAULT_SETTINGS: AdvancedPasteSettings = {
@@ -40,6 +41,7 @@ const DEFAULT_SETTINGS: AdvancedPasteSettings = {
         linkReferenceStyle: "full",
         // preformattedCode: false,
     },
+    enhanceDefaultPaste: true,
 };
 
 function initTurnDown(options: TurndownService.Options): TurnDownService {
@@ -188,23 +190,45 @@ export default class AdvancedPastePlugin extends Plugin {
                     }
                 }
             }
-            this.app.workspace.on("editor-paste", async (evt, editor, info) => {
-                // evt.stopPropagation();
-                // evt.preventDefault();
-                const result = await executePaste(
-                    transforms["default"],
-                    this.utils,
-                    this.app.vault,
-                    true,
-                    editor,
-                    info
-                );
-                if (result == null) {
-                    return;
-                }
-                evt.clipboardData?.clearData();
-                evt.clipboardData?.setData("text/plain", result);
-            });
+            if (this.settings.enhanceDefaultPaste) {
+                this.app.workspace.on("editor-paste", (evt, editor, info) => {
+                    if (
+                        evt.clipboardData?.getData(
+                            "application/x-advpaste-tag"
+                        ) == "tag"
+                    ) {
+                        // Event was triggered by us, don't handle it again
+                        return;
+                    }
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    executePaste(
+                        transforms["default"],
+                        this.utils,
+                        this.app.vault,
+                        true,
+                        editor,
+                        info
+                    ).then((result) => {
+                        // console.log(result);
+                        if (result == null) {
+                            return;
+                        }
+                        const dat = new DataTransfer();
+                        dat.setData("text/html", `<pre>${result}</pre>`);
+                        dat.setData("application/x-advpaste-tag", "tag");
+                        const e = new ClipboardEvent("paste", {
+                            clipboardData: dat,
+                        });
+                        // console.log(info);
+                        const clipboardMgr = (
+                            this.app.workspace.activeEditor as any
+                        )._children[0].clipboardManager;
+                        // console.log(clipboardMgr);
+                        clipboardMgr.handlePaste(e, editor, info);
+                    });
+                });
+            }
         });
         this.addCommand({
             id: `advpaste-debug`,

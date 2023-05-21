@@ -21,7 +21,22 @@ export class AdvancedPasteSettingTab extends PluginSettingTab {
         containerEl.createEl("h2", {
             text: "You need to disable and re-enable this plugin in order to apply the changes to the script directory",
         });
-
+        const hint = containerEl.createEl("h2", {
+            text: "Please unbind Ctrl+V if you previously bind it to advanced paste's default paste command. Use the `Enhanced Ctrl+V` setting instead.",
+        });
+        hint.style.color = "orange";
+        new Setting(containerEl)
+            .setName("Enhanced Ctrl+V")
+            .setDesc(
+                "Enhance the default Ctrl+V behavior. You need to restart Obsidian for the changes to take effect."
+            )
+            .addToggle((toggle) => {
+                toggle.setValue(this.plugin.settings.enhanceDefaultPaste);
+                toggle.onChange(async (value) => {
+                    this.plugin.settings.enhanceDefaultPaste = value;
+                    await this.plugin.saveSettings();
+                });
+            });
         new Setting(containerEl)
             .setName("Script Directory")
             .setDesc("Directory for custom transforms.")
