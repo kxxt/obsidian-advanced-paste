@@ -8,7 +8,7 @@ This plugin provides advanced paste commands and enables you to create custom tr
 
 Usage: Assign a hotkey to the command that you want to use and then press the hotkey to paste the content.
 
-Personally, I prefer to assign <kbd>Ctrl</kbd>+<kbd>V</kbd> to [`Default`](#default), <kbd>Alt</kbd>+<kbd>V</kbd> to [`Smart Join`](#smart-join)
+Personally, I prefer to assign <kbd>Alt</kbd>+<kbd>V</kbd> to [`Smart Join`](#smart-join)
 and <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> to [`Remove Blank Lines`](#remove-blank-lines).
 
 > **Warning**
@@ -20,7 +20,14 @@ and <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> to [`Remove Blank Lines`](#remo
 
 ## Default
 
-This plugin provides a default transform that is better than Obsidian built-in. You can bind `Ctrl+V` to it to replace the Obsidian built-in paste function.
+This plugin provides a default transform that is better than Obsidian built-in. You can disable it in the plugin settings
+(You need to restart obsidian to apply the changes).
+
+It is compatible with the [auto link title plugin](https://github.com/zolrath/obsidian-auto-link-title) but might not be compatible with some other plugins
+that mess with the clipboard.
+
+**If you have bind <kbd>Ctrl</kbd>+<kbd>V</kbd> to this command previously, you 
+should unbind it because the underlying mechanism has changed.**
 
 The default transform will convert html to markdown using [turndown](https://github.com/mixmark-io/turndown)
 and [turndown-plugin-gfm](https://github.com/mixmark-io/turndown-plugin-gfm). Obsidian's built-in paste function also
