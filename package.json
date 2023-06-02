@@ -15,12 +15,12 @@
     "license": "MIT",
     "devDependencies": {
         "@types/lodash": "^4.14.191",
+        "@types/mime-types": "^2.1.1",
         "@types/moment": "^2.13.0",
         "@types/node": "^16.11.6",
         "@types/turndown": "^5.0.1",
         "@typescript-eslint/eslint-plugin": "5.29.0",
         "@typescript-eslint/parser": "5.29.0",
-        "@types/mime-types": "^2.1.1",
         "builtin-modules": "3.3.0",
         "esbuild": "0.14.47",
         "obsidian": "latest",
@@ -32,7 +32,15 @@
         "mime-types": "^2.1.35",
         "moment": "^2.29.4",
         "obsidian-community-lib": "^2.0.2",
+        "remark": "^14.0.3",
+        "remark-gfm": "^3.0.1",
+        "remark-math": "^5.1.1",
+        "remark-parse": "^10.0.2",
+        "remark-stringify": "^10.0.3",
         "turndown": "^7.1.2",
-        "turndown-plugin-gfm": "^1.0.2"
+        "turndown-plugin-gfm": "^1.0.2",
+        "unified": "^10.1.2",
+        "unist-util-is": "^5.2.1",
+        "unist-util-visit": "^4.1.2"
     }
 }

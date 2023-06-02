@@ -26,6 +26,16 @@ export interface TransformUtilsBase {
     mime: typeof import("mime-types");
     _: typeof import("lodash");
     moment: typeof import("moment");
+    remarkUtils: {
+        unified: typeof import("unified").unified;
+        remark: typeof import("remark").remark;
+        remarkGfm: typeof import("remark-gfm").default;
+        remarkMath: typeof import("remark-math").default;
+        remarkParse: typeof import("remark-parse").default;
+        remarkStringify: typeof import("remark-stringify").default;
+        unistUtilVisit: typeof import("unist-util-visit");
+        unistUtilIs: typeof import("unist-util-is");
+    };
 }
 
 export interface TransformUtils extends TransformUtilsBase {

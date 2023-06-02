@@ -21,6 +21,16 @@ import {
     AdvancedPasteSettings,
     DEFAULT_SETTINGS,
 } from "./settings";
+import { unified } from "unified";
+import { remark } from "remark";
+import remarkMath from "remark-math";
+import remarkGfm from "remark-gfm";
+import remarkParse from "remark-parse";
+import remarkStringify from "remark-stringify";
+import * as unistUtilVisit from "unist-util-visit";
+import * as unistUtilIs from "unist-util-is";
+import remarkCtor from "./remark-ctor";
+
 // No types for this plugin, so we have to use require
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { gfm } = require("turndown-plugin-gfm");
@@ -123,6 +133,16 @@ export default class AdvancedPastePlugin extends Plugin {
             mime,
             _,
             moment,
+            remarkUtils: {
+                unified,
+                remark,
+                remarkMath,
+                remarkGfm,
+                unistUtilVisit,
+                unistUtilIs,
+                remarkParse,
+                remarkStringify,
+            },
         };
         const transforms = transformsWrapper({ vault: this.app.vault });
         for (const transformId in transforms) {
