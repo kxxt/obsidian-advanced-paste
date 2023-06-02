@@ -26,15 +26,13 @@ This plugin provides a default transform that is better than Obsidian built-in. 
 It is compatible with the [auto link title plugin](https://github.com/zolrath/obsidian-auto-link-title) but might not be compatible with some other plugins
 that mess with the clipboard.
 
-**If you have bind <kbd>Ctrl</kbd>+<kbd>V</kbd> to this command previously, you 
+**If you have bind <kbd>Ctrl</kbd>+<kbd>V</kbd> to this command previously, you
 should unbind it because the underlying mechanism has changed.**
 
 The default transform will convert html to markdown using [turndown](https://github.com/mixmark-io/turndown)
-and [turndown-plugin-gfm](https://github.com/mixmark-io/turndown-plugin-gfm). Obsidian's built-in paste function also
-uses turndown, but it doesn't use the [turndown-plugin-gfm](https://github.com/mixmark-io/turndown-plugin-gfm) plugin, which means that obsidian's built-in paste
-doesn't support converting html tables to markdown tables, html task lists to markdown task lists, etc.
+and [turndown-plugin-gfm](https://github.com/mixmark-io/turndown-plugin-gfm). And it will remove empty headings and links.
 
-![Showcase](images/default-command.gif)
+![Showcase](images/remove-empty-links.gif)
 
 ### TODO
 
@@ -149,3 +147,55 @@ export async function myTransform(
 }
 myTransform.type = "blob";
 ```
+
+`remark` and `remark` plugins are also provided as utilities, which enables you to transform a Markdown AST. Check out the following example that removes all the images before pasting:
+
+```javascript
+export async function noImage(
+    input,
+    {
+        turndown,
+        remark: {
+            remark,
+            remarkGfm,
+            remarkMath,
+            unistUtilVisit: { visit, SKIP },
+        },
+    }
+) {
+    if (input.types.includes("text/html")) {
+        const html = await input.getType("text/html");
+        const md = turndown.turndown(await html.text());
+        return remark()
+            .use(remarkGfm)
+            .use(remarkMath)
+            .use(() => (tree, file) => {
+                visit(tree, "image", (node, index, parent) => {
+                    parent.children.splice(index, 1);
+                    return [SKIP, index];
+                });
+            })
+            .processSync(md)
+            .toString();
+    }
+    return { kind: "err", value: "No html found in clipboard!" };
+}
+noImage.type = "blob";
+```
+
+For now, the following remark related utilities are provided:
+
+```typescript
+remark: {
+    unified: typeof import("unified").unified;
+    remark: typeof import("remark").remark;
+    remarkGfm: typeof import("remark-gfm").default;
+    remarkMath: typeof import("remark-math").default;
+    remarkParse: typeof import("remark-parse").default;
+    remarkStringify: typeof import("remark-stringify").default;
+    unistUtilVisit: typeof import("unist-util-visit");
+    unistUtilIs: typeof import("unist-util-is");
+}
+```
+
+If you need more utilities, feel free to open an issue or submit a PR.
