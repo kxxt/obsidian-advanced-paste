@@ -26,7 +26,7 @@ export interface TransformUtilsBase {
     mime: typeof import("mime-types");
     _: typeof import("lodash");
     moment: typeof import("moment");
-    remarkUtils: {
+    remark: {
         unified: typeof import("unified").unified;
         remark: typeof import("remark").remark;
         remarkGfm: typeof import("remark-gfm").default;

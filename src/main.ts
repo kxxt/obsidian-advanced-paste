@@ -282,7 +282,7 @@ export default class AdvancedPastePlugin extends Plugin {
             mime,
             _,
             moment,
-            remarkUtils: {
+            remark: {
                 unified,
                 remark,
                 remarkMath,
