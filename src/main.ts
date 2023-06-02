@@ -10,7 +10,13 @@ import {
 } from "obsidian";
 import transformsWrapper from "./transforms";
 import * as _ from "lodash";
-import { Transform, TransformUtils, TransformUtilsBase } from "./transform";
+import {
+    Transform,
+    TransformUtils,
+    TransformUtilsBase,
+    err,
+    ok,
+} from "./transform";
 import TurnDownService from "turndown";
 import TurndownService from "turndown";
 import { getAvailablePathForAttachments } from "obsidian-community-lib";
@@ -126,6 +132,149 @@ export default class AdvancedPastePlugin extends Plugin {
         });
     }
 
+    async saveAttachment(
+        name: string,
+        ext: string,
+        data: ArrayBuffer,
+        sourceFile: TFile
+    ) {
+        const path = await getAvailablePathForAttachments(
+            name,
+            ext,
+            sourceFile
+        );
+        return this.app.vault.createBinary(path, data);
+    }
+
+    async getClipboardData() {
+        const data = await navigator.clipboard.read();
+        if (data.length == 0) return null;
+        return data[0];
+    }
+
+    async handleImagePaste(input: ClipboardItem, sourceFile: TFile) {
+        for (const type of input.types) {
+            if (type.startsWith("image/")) {
+                const blob = await input.getType(type);
+                const ext = mime.extension(type);
+                if (!ext) {
+                    return err(
+                        `Failed to save attachment: Could not determine extension for mime type ${type}`
+                    );
+                }
+                const name = `Pasted Image ${moment().format(
+                    "YYYYMMDDHHmmss"
+                )}`;
+                await this.saveAttachment(
+                    name,
+                    ext,
+                    await blob.arrayBuffer(),
+                    sourceFile
+                );
+                return ok(`![[${name}.${ext}]]`);
+            } else if (type == "text/plain") {
+                const blob = await input.getType(type);
+                const text = await blob.text();
+                if (text.match(/^file:\/\/.+$/)) {
+                    try {
+                        // eslint-disable-next-line @typescript-eslint/no-var-requires
+                        const fs = require("fs").promises;
+                        const path = decodeURIComponent(text).replace(
+                            /^file:\/\//,
+                            ""
+                        );
+                        const mimeType = mime.lookup(path);
+                        if (!mimeType || !mimeType.startsWith("image/"))
+                            throw new Error("Not an image file!");
+                        const buffer = await fs.readFile(path);
+                        const attachmentName = `Pasted Image ${moment().format(
+                            "YYYYMMDDHHmmss"
+                        )}`;
+                        const ext = mime.extension(mimeType);
+                        if (!ext)
+                            throw new Error(
+                                `No extension for mime type ${mimeType}`
+                            );
+                        await this.saveAttachment(
+                            attachmentName,
+                            ext,
+                            buffer,
+                            sourceFile
+                        );
+                        return ok(`![[${attachmentName}.${ext}]]`);
+                    } catch (e) {
+                        // 1. On mobile platform
+                        // 2. Failed to resolve/copy file
+                        console.log(
+                            `Advanced paste: can't interpret ${text} as an image`,
+                            e
+                        );
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    async defaultPasteCommand(
+        evt: ClipboardEvent | null,
+        editor: Editor,
+        info: MarkdownView | MarkdownFileInfo
+    ) {
+        const isManuallyTriggered = evt == null;
+        if (
+            !isManuallyTriggered &&
+            (evt.clipboardData?.getData("application/x-advpaste-tag") ==
+                "tag" ||
+                AUTO_LINK_TITLE_REGEX.test(
+                    evt.clipboardData?.getData("text/plain") ?? ""
+                ))
+        ) {
+            // 1. Event was triggered by us, don't handle it again
+            // 2. url, let obsidian-auto-link-title handle it
+            return;
+        }
+        let html;
+        if (isManuallyTriggered) {
+            const items = await navigator.clipboard.read();
+            if (info.file) {
+                // Try to handle image paste first
+                const res = await this.handleImagePaste(items[0], info.file);
+                if (res != null) {
+                    if (res.kind === "ok") {
+                        editor.replaceSelection(res.value);
+                    } else {
+                        new Notice(res.value);
+                        return;
+                    }
+                }
+            }
+            if (items.length == 0 || !items[0].types.includes("text/html"))
+                return;
+            const blob = await items[0].getType("text/html");
+            html = await blob.text();
+        } else {
+            html = evt.clipboardData?.getData("text/html");
+        }
+        if (html) {
+            evt?.preventDefault();
+            evt?.stopPropagation();
+            const md = this.utils.turndown.turndown(html);
+            const processed = await remarkCtor(this.settings).process(md);
+            const dat = new DataTransfer();
+            dat.setData("text/html", `<pre>${processed}</pre>`);
+            dat.setData("application/x-advpaste-tag", "tag");
+            const e = new ClipboardEvent("paste", {
+                clipboardData: dat,
+            });
+            // console.log(info);
+            const clipboardMgr = (this.app.workspace.activeEditor as any)
+                ._children[0].clipboardManager;
+            // console.log(clipboardMgr);
+            clipboardMgr.handlePaste(e, editor, info);
+        }
+    }
+
     async onload() {
         await this.loadSettings();
         this.utils = {
@@ -194,39 +343,18 @@ export default class AdvancedPastePlugin extends Plugin {
                     }
                 }
             }
+            this.addCommand({
+                id: "default",
+                name: "Default",
+                editorCallback: (editor, info) => {
+                    this.defaultPasteCommand(null, editor, info);
+                },
+            });
             if (this.settings.enhanceDefaultPaste) {
-                this.app.workspace.on("editor-paste", (evt, editor, info) => {
-                    if (
-                        evt.clipboardData?.getData(
-                            "application/x-advpaste-tag"
-                        ) == "tag" ||
-                        AUTO_LINK_TITLE_REGEX.test(
-                            evt.clipboardData?.getData("text/plain") ?? ""
-                        )
-                    ) {
-                        // 1. Event was triggered by us, don't handle it again
-                        // 2. url, let obsidian-auto-link-title handle it
-                        return;
-                    }
-                    const html = evt.clipboardData?.getData("text/html");
-                    if (html) {
-                        evt.preventDefault();
-                        evt.stopPropagation();
-                        const md = this.utils.turndown.turndown(html);
-                        const dat = new DataTransfer();
-                        dat.setData("text/html", `<pre>${md}</pre>`);
-                        dat.setData("application/x-advpaste-tag", "tag");
-                        const e = new ClipboardEvent("paste", {
-                            clipboardData: dat,
-                        });
-                        // console.log(info);
-                        const clipboardMgr = (
-                            this.app.workspace.activeEditor as any
-                        )._children[0].clipboardManager;
-                        // console.log(clipboardMgr);
-                        clipboardMgr.handlePaste(e, editor, info);
-                    }
-                });
+                this.app.workspace.on(
+                    "editor-paste",
+                    this.defaultPasteCommand.bind(this)
+                );
             }
         });
         this.addCommand({
