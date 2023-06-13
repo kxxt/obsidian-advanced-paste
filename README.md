@@ -131,7 +131,7 @@ saveAttachment: (name: string, ext: string, data: ArrayBuffer) =>
     Promise<TFile>;
 ```
 
-`lodash`, `moment.js` and `mime-types` are also provided as utilities. Check out the following example:
+`lodash`, `moment.js` and `mime` are also provided as utilities. Check out the following example:
 
 ```javascript
 export async function myTransform(

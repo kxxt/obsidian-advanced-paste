@@ -23,7 +23,7 @@ export type TransformResult = Ok<string> | Err<string>;
 
 export interface TransformUtilsBase {
     turndown: TurndownService;
-    mime: typeof import("mime-types");
+    mime: typeof import("mime");
     _: typeof import("lodash");
     moment: typeof import("moment");
     remark: {

@@ -20,7 +20,7 @@ import {
 import TurnDownService from "turndown";
 import TurndownService from "turndown";
 import { getAvailablePathForAttachments } from "obsidian-community-lib";
-import mime from "mime-types";
+import mime from "mime";
 import moment from "moment";
 import {
     AdvancedPasteSettingTab,
@@ -156,7 +156,7 @@ export default class AdvancedPastePlugin extends Plugin {
         for (const type of input.types) {
             if (type.startsWith("image/")) {
                 const blob = await input.getType(type);
-                const ext = mime.extension(type);
+                const ext = mime.getExtension(type);
                 if (!ext) {
                     return err(
                         `Failed to save attachment: Could not determine extension for mime type ${type}`
@@ -183,14 +183,14 @@ export default class AdvancedPastePlugin extends Plugin {
                             /^file:\/\//,
                             ""
                         );
-                        const mimeType = mime.lookup(path);
+                        const mimeType = mime.getType(path);
                         if (!mimeType || !mimeType.startsWith("image/"))
                             throw new Error("Not an image file!");
                         const buffer = await fs.readFile(path);
                         const attachmentName = `Pasted Image ${moment().format(
                             "YYYYMMDDHHmmss"
                         )}`;
-                        const ext = mime.extension(mimeType);
+                        const ext = mime.getExtension(mimeType);
                         if (!ext)
                             throw new Error(
                                 `No extension for mime type ${mimeType}`
