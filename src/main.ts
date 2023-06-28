@@ -221,7 +221,7 @@ export default class AdvancedPastePlugin extends Plugin {
         editor: Editor,
         info: MarkdownView | MarkdownFileInfo
     ) {
-        const isManuallyTriggered = evt == null;
+        const isManuallyTriggered = evt == null; // Not triggered by Ctrl+V
         if (
             !isManuallyTriggered &&
             (evt.clipboardData?.getData("application/x-advpaste-tag") ==
@@ -254,6 +254,13 @@ export default class AdvancedPastePlugin extends Plugin {
             const blob = await items[0].getType("text/html");
             html = await blob.text();
         } else {
+            // Let obsidian handle image paste, do not handle it ourselves
+            if (
+                evt.clipboardData?.types.some(
+                    (x) => x == "Files" || x.startsWith("image/")
+                )
+            )
+                return;
             html = evt.clipboardData?.getData("text/html");
         }
         if (html) {
