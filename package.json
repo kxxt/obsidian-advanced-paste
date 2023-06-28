@@ -1,6 +1,6 @@
 {
     "name": "advanced-paste",
-    "version": "2.5.0",
+    "version": "2.5.1",
     "description": "This plugin provides advanced paste commands and enables you to create custom transforms for pasting.",
     "main": "main.js",
     "scripts": {

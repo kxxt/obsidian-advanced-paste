@@ -1,7 +1,7 @@
 {
 	"id": "advanced-paste",
 	"name": "Advanced Paste",
-	"version": "2.5.0",
+	"version": "2.5.1",
 	"minAppVersion": "0.15.0",
 	"description": "This plugin provides advanced paste commands and enables you to create custom transforms for pasting.",
 	"author": "kxxt",
