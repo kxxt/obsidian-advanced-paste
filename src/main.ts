@@ -374,7 +374,7 @@ export default class AdvancedPastePlugin extends Plugin {
         });
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new AdvancedPasteSettingTab(this.app, this));
-        console.info("obsidian-advanced-pasted loaded!");
+        console.info(`${this.manifest.name} loaded!`);
     }
 
     onunload() {}
