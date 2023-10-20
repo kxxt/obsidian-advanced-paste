@@ -24,7 +24,7 @@ const DEFAULT_SETTINGS: AdvancedPasteSettings = {
         linkReferenceStyle: "full",
         // preformattedCode: false,
     },
-    enhanceDefaultPaste: true,
+    enhanceDefaultPaste: false,
     // autoLinkTitleRegex:
 };
 
