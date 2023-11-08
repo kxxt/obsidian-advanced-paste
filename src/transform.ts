@@ -1,4 +1,4 @@
-import { TFile } from "obsidian";
+import { Editor, TFile } from "obsidian";
 import TurndownService from "turndown";
 export type TransformType = "text" | "blob";
 
@@ -44,6 +44,7 @@ export interface TransformUtils extends TransformUtilsBase {
         ext: string,
         data: ArrayBuffer
     ) => Promise<TFile>;
+    editor: Editor;
 }
 
 export interface AdvpasteInternalParams {

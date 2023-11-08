@@ -73,6 +73,7 @@ async function executePaste(
             const path = await getAvailablePathForAttachments(name, ext, file);
             return vault.createBinary(path, data);
         },
+        editor,
     };
     const internalParams = { shouldHandleImagePasting: !withinEvent };
     try {

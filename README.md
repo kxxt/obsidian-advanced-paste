@@ -131,12 +131,14 @@ saveAttachment: (name: string, ext: string, data: ArrayBuffer) =>
     Promise<TFile>;
 ```
 
+If you need more information about or control over the editor state, the [Obsidian `editor` object](https://docs.obsidian.md/Plugins/Editor/Editor) is provided as a utility.
+
 `lodash`, `moment.js` and `mime` are also provided as utilities. Check out the following example:
 
 ```javascript
 export async function myTransform(
     input,
-    { turndown, _, moment, mime, saveAttachment }
+    { turndown, editor, _, moment, mime, saveAttachment }
 ) {
     if (input.types.includes("text/html")) {
         const html = await input.getType("text/html");
