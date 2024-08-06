@@ -1,3 +1,6 @@
+# !! Project Archived, feel free to fork
+# !! I am moving away from obsidian to open source alternatives
+
 # Advanced Paste for Obsidian
 
 [![Sponsor](https://img.shields.io/badge/sponsor-via%20paypal-blue)](https://www.paypal.com/paypalme/tokxxt)
